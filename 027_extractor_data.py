@@ -134,3 +134,26 @@ range_low = label_dict["Voltage01"]["low"]
 
 for i in label_dict:
     log.debug(f'{i}:{label_dict[i]["low"]}～{label_dict[i]["high"]}')
+
+
+
+# 結果データの読み込み
+temp_df_list = []
+for i, j in enumerate(all_file_names):
+    # 結果列の名前を判別するための辞書作成
+    if i == 0:
+        dict_label = {"key":"value"}
+        with open(j, encoding="cp932")as f:
+            temp_label = f.readlines()[39:41]
+        for ii, (m, n) in enumerate(zip(temp_label[0].split(","), temp_label[1].split(","))):
+            log.debug(f"{ii}:{m.strip()}->{n.strip()}")
+            if ii > 1:
+                dict_label[n.strip().strip('"')] = m.strip()
+        log.debug(dict_label)
+
+    log.debug(j)
+    temp_df = pd.read_csv(j, skiprows=70, encoding="cp932")
+    temp_df_list.append(temp_df)
+
+
+
