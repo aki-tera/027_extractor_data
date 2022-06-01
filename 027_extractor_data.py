@@ -155,5 +155,8 @@ for i, j in enumerate(all_file_names):
     temp_df = pd.read_csv(j, skiprows=70, encoding="cp932")
     temp_df_list.append(temp_df)
 
-
+# データフレームの結合
+df_csv = pd.concat(temp_df_list, ignore_index=False)
+df_csv.reset_index(drop=True, inplace=True)
+log.debug(df_csv.head())
 
