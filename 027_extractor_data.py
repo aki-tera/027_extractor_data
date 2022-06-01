@@ -98,3 +98,39 @@ def plot_graph(pg_df, pg_title_text, pg_plane=True):
         # グラフの重なりをなくす為に必要
         plt.tight_layout()
     plt.show()
+
+
+# ロガー登録
+log = logger.Logger("MAIN", level=DEBUG_LEVEL)
+
+
+# パラメータの取り出し
+with open("setting.json", "r", encoding="utf-8") as setting:
+    setting_dict = json.load(setting)
+
+log.debug("json")
+# 設定jsonから変数へ読み込み
+# ファイル名
+single_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["single"])
+double_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["double"])
+all_file_names = single_file_names + double_file_names
+
+log.debug(all_file_names)
+
+# 初回プロットの範囲
+plot_range_start = setting_dict["plot"]["start"]
+plot_range_end = setting_dict["plot"]["end"]
+
+log.debug(f"{plot_range_start}～{plot_range_end}")
+
+# ラベル
+label_dict = setting_dict["label"]
+
+log.debug(label_dict)
+
+# 閾値
+range_high = label_dict["Voltage01"]["high"]
+range_low = label_dict["Voltage01"]["low"]
+
+for i in label_dict:
+    log.debug(f'{i}:{label_dict[i]["low"]}～{label_dict[i]["high"]}')
