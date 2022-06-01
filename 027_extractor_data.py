@@ -174,3 +174,9 @@ pandas_list = df_temp.index
 list_index = separate_index(list(pandas_list))
 log.debug(list_index[0])
 log.debug(df_csv.loc[list_index[0]])
+
+# 中央値の算出
+for i in list_index:
+    df_temp = df_csv.loc[i]
+    temp = df_temp[dict_label["Voltage01"]].median()
+    print(temp)
