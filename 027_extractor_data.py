@@ -160,3 +160,8 @@ df_csv = pd.concat(temp_df_list, ignore_index=False)
 df_csv.reset_index(drop=True, inplace=True)
 log.debug(df_csv.head())
 
+# プロットする
+plot_graph(df_csv.loc[plot_range_start:plot_range_end, dict_label["Voltage01"]],
+           f"読み込んだデータの一部（{plot_range_start}～{plot_range_end}）を表示")
+
+
