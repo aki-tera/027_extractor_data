@@ -98,3 +98,85 @@ def plot_graph(pg_df, pg_title_text, pg_plane=True):
         # グラフの重なりをなくす為に必要
         plt.tight_layout()
     plt.show()
+
+
+# ロガー登録
+log = logger.Logger("MAIN", level=DEBUG_LEVEL)
+
+
+# パラメータの取り出し
+with open("setting.json", "r", encoding="utf-8") as setting:
+    setting_dict = json.load(setting)
+
+log.debug("json")
+# 設定jsonから変数へ読み込み
+# ファイル名
+single_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["single"])
+double_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["double"])
+all_file_names = single_file_names + double_file_names
+
+log.debug(all_file_names)
+
+# 初回プロットの範囲
+plot_range_start = setting_dict["plot"]["start"]
+plot_range_end = setting_dict["plot"]["end"]
+
+log.debug(f"{plot_range_start}～{plot_range_end}")
+
+# ラベル
+label_dict = setting_dict["label"]
+
+log.debug(label_dict)
+
+# 閾値
+range_high = label_dict["Voltage01"]["high"]
+range_low = label_dict["Voltage01"]["low"]
+
+for i in label_dict:
+    log.debug(f'{i}:{label_dict[i]["low"]}～{label_dict[i]["high"]}')
+
+
+
+# 結果データの読み込み
+temp_df_list = []
+for i, j in enumerate(all_file_names):
+    # 結果列の名前を判別するための辞書作成
+    if i == 0:
+        dict_label = {"key":"value"}
+        with open(j, encoding="cp932")as f:
+            temp_label = f.readlines()[39:41]
+        for ii, (m, n) in enumerate(zip(temp_label[0].split(","), temp_label[1].split(","))):
+            log.debug(f"{ii}:{m.strip()}->{n.strip()}")
+            if ii > 1:
+                dict_label[n.strip().strip('"')] = m.strip()
+        log.debug(dict_label)
+
+    log.debug(j)
+    temp_df = pd.read_csv(j, skiprows=70, encoding="cp932")
+    temp_df_list.append(temp_df)
+
+# データフレームの結合
+df_csv = pd.concat(temp_df_list, ignore_index=False)
+df_csv.reset_index(drop=True, inplace=True)
+log.debug(df_csv.head(5))
+
+# プロットする
+plot_graph(df_csv.loc[plot_range_start:plot_range_end, dict_label["Voltage01"]],
+           f"読み込んだデータの一部（{plot_range_start}～{plot_range_end}）を表示")
+
+
+# データ切り分け
+df_temp = df_csv[(range_low < df_csv[dict_label["Voltage01"]]) & (df_csv[dict_label["Voltage01"]] < range_high) ]
+log.debug(df_temp.head(5))
+
+# indexの抽出
+pandas_list = df_temp.index
+list_index = separate_index(list(pandas_list))
+log.debug(list_index[0])
+log.debug(df_csv.loc[list_index[0]])
+
+# 中央値の算出
+for i in list_index:
+    df_temp = df_csv.loc[i]
+    temp = df_temp[dict_label["Voltage01"]].median()
+    print(temp)
