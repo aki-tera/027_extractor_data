@@ -12,3 +12,12 @@ from matplotlib import cm
 from matplotlib import rc
 jp_font = "Yu Gothic"
 rc('font', family=jp_font)
+
+# PEP8に準拠するとimportが先頭に行くので苦肉の策
+while True:
+    import sys
+    sys.path.append("../000_mymodule/")
+    import logger
+    from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
+    DEBUG_LEVEL = DEBUG
+    break
