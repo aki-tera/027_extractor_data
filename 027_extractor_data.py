@@ -168,3 +168,9 @@ plot_graph(df_csv.loc[plot_range_start:plot_range_end, dict_label["Voltage01"]],
 # データ切り分け
 df_temp = df_csv[(range_low < df_csv[dict_label["Voltage01"]]) & (df_csv[dict_label["Voltage01"]] < range_high) ]
 log.debug(df_temp.head(5))
+
+# indexの抽出
+pandas_list = df_temp.index
+list_index = separate_index(list(pandas_list))
+log.debug(list_index[0])
+log.debug(df_csv.loc[list_index[0]])
