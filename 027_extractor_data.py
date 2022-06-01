@@ -158,10 +158,13 @@ for i, j in enumerate(all_file_names):
 # データフレームの結合
 df_csv = pd.concat(temp_df_list, ignore_index=False)
 df_csv.reset_index(drop=True, inplace=True)
-log.debug(df_csv.head())
+log.debug(df_csv.head(5))
 
 # プロットする
 plot_graph(df_csv.loc[plot_range_start:plot_range_end, dict_label["Voltage01"]],
            f"読み込んだデータの一部（{plot_range_start}～{plot_range_end}）を表示")
 
 
+# データ切り分け
+df_temp = df_csv[(range_low < df_csv[dict_label["Voltage01"]]) & (df_csv[dict_label["Voltage01"]] < range_high) ]
+log.debug(df_temp.head(5))
