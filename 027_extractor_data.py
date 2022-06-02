@@ -162,8 +162,8 @@ df_csv.reset_index(drop=True, inplace=True)
 log.debug(df_csv.head(5))
 
 # プロットする
-#plot_graph(df_csv.loc[plot_range_start:plot_range_end, dict_label["Voltage01"]],
-#           f"読み込んだデータの一部（{plot_range_start}～{plot_range_end}）を表示")
+plot_graph(df_csv.loc[plot_range_start:plot_range_end, dict_label["Voltage01"]],
+           f"読み込んだデータの一部（{plot_range_start}～{plot_range_end}）を表示")
 
 
 # データ切り分け
@@ -175,6 +175,17 @@ pandas_list = df_temp.index
 list_index = separate_index(list(pandas_list))
 log.debug(list_index[0])
 log.debug(df_csv.loc[list_index[0]])
+
+# 確認用プロットを表示
+df_plot_temp = pd.DataFrame(index=[])
+for i, j in enumerate(list_index):
+    if -1 < i < 9:
+        temp = df_csv[j[0]:j[-1]][dict_label["Voltage01"]]
+        temp = temp.reset_index()
+        df_plot_temp[str(i)] = temp[dict_label["Voltage01"]]
+# 一部の切り出した波形を表示
+print("おかしなグラフが無いか確認する")
+plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
 
 # 中央値の算出
 result_mediun = []
