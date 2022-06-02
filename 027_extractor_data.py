@@ -2,6 +2,7 @@ import json
 import csv
 
 import glob
+from cv2 import DISOPTICAL_FLOW_PRESET_ULTRAFAST
 import pandas as pd
 from pandas.core.series import Series
 from pandas.core.frame import DataFrame
@@ -196,3 +197,6 @@ log.debug(result_endheader)
 log.debug(result_time)
 
 # 結果用データフレーム作成（時間、秒、結果）
+df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns = ["#EndHeader", "日時(μs)", "Voltage01"])
+
+log.debug(df_result)
