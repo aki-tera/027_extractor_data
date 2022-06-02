@@ -20,7 +20,7 @@ while True:
     sys.path.append("../000_mymodule/")
     import logger
     from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
-    DEBUG_LEVEL = DEBUG
+    DEBUG_LEVEL = INFO
     break
 
 def separate_index(list):
@@ -109,14 +109,14 @@ log = logger.Logger("MAIN", level=DEBUG_LEVEL)
 with open("setting.json", "r", encoding="utf-8") as setting:
     setting_dict = json.load(setting)
 
-log.debug("json")
+log.info("json")
 # 設定jsonから変数へ読み込み
 # ファイル名
 single_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["single"])
 double_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["double"])
 all_file_names = single_file_names + double_file_names
 
-log.debug(all_file_names)
+log.info(all_file_names)
 
 # 初回プロットの範囲
 plot_range_start = setting_dict["plot"]["start"]
@@ -200,3 +200,6 @@ log.debug(result_time)
 df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns = ["#EndHeader", "日時(μs)", "Voltage01"])
 
 log.debug(df_result)
+
+# エクセルへの書き込み
+df_result.to_excel("result.xlsx", sheet_name="Voltage01", index=False)
