@@ -1,14 +1,14 @@
 {
     "file":{
         "説明":"入力ファイル名",
-        "path":"data04/",
-        "single":"auto$0$?.csv",
-        "double":"auto$0$??.csv"
+        "path":"data01/",
+        "single":"*$0$?.csv",
+        "double":"*$0$??.csv"
     },
     "plot":{
         "説明":"最初のプロットデータの範囲を示す",
-        "start":0,
-        "end":30
+        "start":10000,
+        "end":30000
     },
     "label":{
         "Voltage01":{
