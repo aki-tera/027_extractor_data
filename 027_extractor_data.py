@@ -161,13 +161,13 @@ df_csv.reset_index(drop=True, inplace=True)
 log.debug(df_csv.head(5))
 
 # プロットする
-plot_graph(df_csv.loc[plot_range_start:plot_range_end, dict_label["Voltage01"]],
-           f"読み込んだデータの一部（{plot_range_start}～{plot_range_end}）を表示")
+#plot_graph(df_csv.loc[plot_range_start:plot_range_end, dict_label["Voltage01"]],
+#           f"読み込んだデータの一部（{plot_range_start}～{plot_range_end}）を表示")
 
 
 # データ切り分け
 df_temp = df_csv[(range_low < df_csv[dict_label["Voltage01"]]) & (df_csv[dict_label["Voltage01"]] < range_high) ]
-log.debug(df_temp.head(5))
+log.debug(df_temp)
 
 # indexの抽出
 pandas_list = df_temp.index
@@ -176,7 +176,23 @@ log.debug(list_index[0])
 log.debug(df_csv.loc[list_index[0]])
 
 # 中央値の算出
+result_mediun = []
+result_endheader = []
+result_time = []
+
+
 for i in list_index:
+    log.debug(f"list{i}->value:{i[0]}")
     df_temp = df_csv.loc[i]
-    temp = df_temp[dict_label["Voltage01"]].median()
-    print(temp)
+    temp_result = df_temp[dict_label["Voltage01"]].median()
+    temp_endheader = df_csv.iloc[i[0], 0]
+    temp_time = df_csv.iloc[i[0], 1]
+    result_mediun.append(temp_result)
+    result_endheader.append(temp_endheader)
+    result_time.append(temp_time)
+
+log.debug(result_mediun)
+log.debug(result_endheader)
+log.debug(result_time)
+
+# 結果用データフレーム作成（時間、秒、結果）
