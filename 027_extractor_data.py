@@ -11,6 +11,7 @@ from matplotlib import cm
 
 # 日本語フォント設定
 from matplotlib import rc
+from sklearn.utils import column_or_1d
 jp_font = "Yu Gothic"
 rc('font', family=jp_font)
 
@@ -101,116 +102,137 @@ def plot_graph(pg_df, pg_title_text, pg_plane=True):
     plt.show()
 
 
+
+class ExtractorData():
+    """concatenate csv files, extract specific data and save the results to excel.
+    """
+    log = logger.Logger("ExtractorData", level=DEBUG_LEVEL)
+    def __init__(self, json_file_path):
+        """read json, set the variables, concatenate csv files and make dataframe.
+
+        Args:
+            json_file_path (str): path of the json file.
+        """
+        # パラメータの取り出し
+        with open(json_file_path, "r", encoding="utf-8") as setting:
+            self._setting_dict = json.load(setting)
+        
+        self.log.info("json")
+
+        # 設定jsonから変数へ読み込み
+        # ファイル名
+        single_file_names = glob.glob(self._setting_dict["file"]["path"] + self._setting_dict["file"]["single"])
+        double_file_names = glob.glob(self._setting_dict["file"]["path"] + self._setting_dict["file"]["double"])
+        all_file_names = single_file_names + double_file_names
+        # 初回プロットの範囲
+        self._plot_range_start = self._setting_dict["plot"]["start"]
+        self._plot_range_end = self._setting_dict["plot"]["end"]
+        # ラベル
+        self.label_index = self._setting_dict["label"]
+
+        self.log.info(all_file_names)
+        log.debug(f"{self._plot_range_start}～{self._plot_range_end}")
+        log.debug(self.label_index)
+
+        # 結果データの読み込み
+        temp_df_list = []
+        for i, j in enumerate(all_file_names):
+            # 結果列の名前を判別するための辞書作成
+            if i == 0:
+                self.dict_label = {"key":"value"}
+                with open(j, encoding="cp932")as f:
+                    temp_label = f.readlines()[39:41]
+                for ii, (m, n) in enumerate(zip(temp_label[0].split(","), temp_label[1].split(","))):
+                    log.debug(f"{ii}:{m.strip()}->{n.strip()}")
+                    if ii > 1:
+                        self.dict_label[n.strip().strip('"')] = m.strip()
+                log.debug(self.dict_label)
+            temp_df = pd.read_csv(j, skiprows=70, encoding="cp932")
+            temp_df_list.append(temp_df)
+
+        # データフレームの結合
+        self._df_csv = pd.concat(temp_df_list, ignore_index=False)
+        self._df_csv.reset_index(drop=True, inplace=True)
+        log.debug(self._df_csv.head(5))
+
+    def confirm_data(self, label_name, display_graph=True):
+        """confirm data
+        Args:
+            label_name (str): the label indicating the target data.
+            display_graph (bool, optional): graph display on/off. Defaults to True.
+        """
+        if display_graph:
+            # プロットする
+            print("取得したデータの確認")
+            plot_graph(self._df_csv.loc[self._plot_range_start:self._plot_range_end, self.dict_label["Voltage01"]],
+                       f"読み込んだデータの一部（{self._plot_range_start}～{self._plot_range_end}）を表示")
+
+    def cut_out_data(self, label_name, display_graph=True):
+        # 列の名称
+        column_name = self.dict_label[label_name]
+        # 閾値
+        range_high = self.label_index[self.dict_label[label_name]]["high"]
+        range_low = self.label_index[self.dict_label[label_name]]["low"]
+        # データ切り分け
+        df_temp = self._df_csv[(range_low < self._df_csv[column_name]) & (self._df_csv[column_name] < range_high)]
+        # indexの抽出
+        pandas_list = df_temp.index
+        self.list_index = separate_index(list(pandas_list))
+        log.debug(self.list_index[0])
+        log.debug(self._df_csv.loc[self.list_index[0]])
+        # 確認用プロットを表示
+        if display_graph:
+            df_plot_temp = pd.DataFrame(index=[])
+            for i, j in enumerate(self.list_index):
+                if -1 < i < 9:
+                    temp = self._df_csv[j[0]:j[-1]][column_name]
+                    temp = temp.reset_index()
+                    df_plot_temp[str(i)] = temp[column_name]
+            # 一部の切り出した波形を表示
+            print("おかしなグラフが無いか確認する")
+            plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
+
+    def output_mediun(self, label_name):
+        # 列の名称
+        column_name = self.dict_label[label_name]
+        # 中央値の算出
+        result_mediun = []
+        result_endheader = []
+        result_time = []
+        for i in self.list_index:
+            log.debug(f"list{i}->value:{i[0]}")
+            df_temp = self._df_csv.loc[i]
+            temp_result = df_temp[column_name].median()
+            temp_endheader = self._df_csv.iloc[i[0], 0]
+            temp_time = self._df_csv.iloc[i[0], 1]
+            result_mediun.append(temp_result)
+            result_endheader.append(temp_endheader)
+            result_time.append(temp_time)
+        # 結果用データフレーム作成（時間、秒、結果）
+        self._df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", "Voltage01"])
+        log.debug(df_result)
+
+    def write_xlsx(self, write_mode="m"):
+        # 列の名称
+        column_name = self.dict_label[label_name]
+        # エクセルへの書き込み
+        self,df_result.to_excel("result.xlsx", sheet_name=column_name, index=False, mode=write_mode)
+
 # ロガー登録
 log = logger.Logger("MAIN", level=DEBUG_LEVEL)
 
-
-# パラメータの取り出し
-with open("setting.json", "r", encoding="utf-8") as setting:
-    setting_dict = json.load(setting)
-
-log.info("json")
-# 設定jsonから変数へ読み込み
-# ファイル名
-single_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["single"])
-double_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["double"])
-all_file_names = single_file_names + double_file_names
-
-log.info(all_file_names)
-
-# 初回プロットの範囲
-plot_range_start = setting_dict["plot"]["start"]
-plot_range_end = setting_dict["plot"]["end"]
-
-log.debug(f"{plot_range_start}～{plot_range_end}")
-
-# ラベル
-label_dict = setting_dict["label"]
-
-log.debug(label_dict)
-
-# 閾値
-range_high = label_dict["Voltage01"]["high"]
-range_low = label_dict["Voltage01"]["low"]
-
-for i in label_dict:
-    log.debug(f'{i}:{label_dict[i]["low"]}～{label_dict[i]["high"]}')
+def main():
+    data = ExtractorData("setting.json")
+    for i, n in enumerate(data.label_index):
+        log.debug(n)
+        data.confirm_data(n, display_graph=True)
+        data.cut_out_data(n, display_graph=True)
+        data.output_mediun(n)
+        if i == 0:
+            data.write_xlsx(n)
+        else:
+            data.write_xlsx(n, write_mode="a")
 
 
-
-# 結果データの読み込み
-temp_df_list = []
-for i, j in enumerate(all_file_names):
-    # 結果列の名前を判別するための辞書作成
-    if i == 0:
-        dict_label = {"key":"value"}
-        with open(j, encoding="cp932")as f:
-            temp_label = f.readlines()[39:41]
-        for ii, (m, n) in enumerate(zip(temp_label[0].split(","), temp_label[1].split(","))):
-            log.debug(f"{ii}:{m.strip()}->{n.strip()}")
-            if ii > 1:
-                dict_label[n.strip().strip('"')] = m.strip()
-        log.debug(dict_label)
-
-    log.debug(j)
-    temp_df = pd.read_csv(j, skiprows=70, encoding="cp932")
-    temp_df_list.append(temp_df)
-
-# データフレームの結合
-df_csv = pd.concat(temp_df_list, ignore_index=False)
-df_csv.reset_index(drop=True, inplace=True)
-log.debug(df_csv.head(5))
-
-# プロットする
-plot_graph(df_csv.loc[plot_range_start:plot_range_end, dict_label["Voltage01"]],
-           f"読み込んだデータの一部（{plot_range_start}～{plot_range_end}）を表示")
-
-
-# データ切り分け
-df_temp = df_csv[(range_low < df_csv[dict_label["Voltage01"]]) & (df_csv[dict_label["Voltage01"]] < range_high) ]
-log.debug(df_temp)
-
-# indexの抽出
-pandas_list = df_temp.index
-list_index = separate_index(list(pandas_list))
-log.debug(list_index[0])
-log.debug(df_csv.loc[list_index[0]])
-
-# 確認用プロットを表示
-df_plot_temp = pd.DataFrame(index=[])
-for i, j in enumerate(list_index):
-    if -1 < i < 9:
-        temp = df_csv[j[0]:j[-1]][dict_label["Voltage01"]]
-        temp = temp.reset_index()
-        df_plot_temp[str(i)] = temp[dict_label["Voltage01"]]
-# 一部の切り出した波形を表示
-print("おかしなグラフが無いか確認する")
-plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
-
-# 中央値の算出
-result_mediun = []
-result_endheader = []
-result_time = []
-
-
-for i in list_index:
-    log.debug(f"list{i}->value:{i[0]}")
-    df_temp = df_csv.loc[i]
-    temp_result = df_temp[dict_label["Voltage01"]].median()
-    temp_endheader = df_csv.iloc[i[0], 0]
-    temp_time = df_csv.iloc[i[0], 1]
-    result_mediun.append(temp_result)
-    result_endheader.append(temp_endheader)
-    result_time.append(temp_time)
-
-log.debug(result_mediun)
-log.debug(result_endheader)
-log.debug(result_time)
-
-# 結果用データフレーム作成（時間、秒、結果）
-df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns = ["#EndHeader", "日時(μs)", "Voltage01"])
-
-log.debug(df_result)
-
-# エクセルへの書き込み
-df_result.to_excel("result.xlsx", sheet_name="Voltage01", index=False)
+if __name__ == "__main__":
+    main()
