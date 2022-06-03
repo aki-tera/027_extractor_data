@@ -216,7 +216,7 @@ log.debug(result_endheader)
 log.debug(result_time)
 
 # 結果用データフレーム作成（時間、秒、結果）
-df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns = ["#EndHeader", "日時(μs)", "Voltage01"])
+df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", "Voltage01"])
 
 log.debug(df_result)
 
@@ -230,10 +230,9 @@ def main():
     data = ExtractorData("setting.json")
     for i, n in enumerate(data.label_index):
         data.confirm_data(n, display_graph=True)
-        data.generate_differences(display_graph=True)
         data.cut_out_data(display_graph=True)
         data.confirm_graphs(display_graph=True)
-        data.output_results(n, display_graph=True)
+        data.output_mediun(n, display_graph=True)
         if i == 0:
             data.write_xlsx()
         else:
