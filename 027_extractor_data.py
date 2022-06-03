@@ -113,7 +113,7 @@ class ExtractorData():
             json_file_path (str): path of the json file.
         """
         # パラメータの取り出し
-        with open("setting.json", "r", encoding="utf-8") as setting:
+        with open(json_file_path, "r", encoding="utf-8") as setting:
             self._setting_dict = json.load(setting)
         
         self.log.info("json")
@@ -154,26 +154,23 @@ class ExtractorData():
         self._df_csv.reset_index(drop=True, inplace=True)
         log.debug(self._df_csv.head(5))
 
+    def confirm_data(self, label_name, display_graph=True):
+        """confirm data
+        Args:
+            label_name (str): the label indicating the target data.
+            display_graph (bool, optional): graph display on/off. Defaults to True.
+        """
+        if display_graph:
+            # プロットする
+            plot_graph(self._df_csv.loc[self._plot_range_start:self._plot_range_end, self.dict_label["Voltage01"]],
+                       f"読み込んだデータの一部（{self._plot_range_start}～{self._plot_range_end}）を表示")
 
 
 
 
-
-# 閾値
-range_high = self.label_index["Voltage01"]["high"]
-range_low = self.label_index["Voltage01"]["low"]
-
-for i in self.label_index:
-    log.debug(f'{i}:{self.label_index[i]["low"]}～{self.label_index[i]["high"]}')
-
-
-
-
-
-# プロットする
-plot_graph(self._df_csv.loc[self._plot_range_start:self._plot_range_end, self.dict_label["Voltage01"]],
-           f"読み込んだデータの一部（{self._plot_range_start}～{self._plot_range_end}）を表示")
-
+        # 閾値
+        range_high = self.label_index[self.dict_label[label_name]]["high"]
+        range_low = self.label_index[self.dict_label[label_name]]["low"]
 
 # データ切り分け
 df_temp = self._df_csv[(range_low < self._df_csv[self.dict_label["Voltage01"]]) & (self._df_csv[self.dict_label["Voltage01"]] < range_high) ]
