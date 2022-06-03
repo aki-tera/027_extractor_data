@@ -101,31 +101,39 @@ def plot_graph(pg_df, pg_title_text, pg_plane=True):
     plt.show()
 
 
-# ロガー登録
-log = logger.Logger("MAIN", level=DEBUG_LEVEL)
 
+class ExtractorData():
+    """concatenate csv files, extract specific data and save the results to excel.
+    """
+    log = logger.Logger("ExtractorData", level=DEBUG_LEVEL)
+    def __init__(self, json_file_path):
+        """read json, set the variables, concatenate csv files and make dataframe.
 
-# パラメータの取り出し
-with open("setting.json", "r", encoding="utf-8") as setting:
-    setting_dict = json.load(setting)
+        Args:
+            json_file_path (str): path of the json file.
+        """
+        # パラメータの取り出し
+        with open("setting.json", "r", encoding="utf-8") as setting:
+            self._setting_dict = json.load(setting)
+        
+        self.log.info("json")
 
-log.info("json")
-# 設定jsonから変数へ読み込み
-# ファイル名
-single_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["single"])
-double_file_names = glob.glob(setting_dict["file"]["path"] + setting_dict["file"]["double"])
-all_file_names = single_file_names + double_file_names
+        # 設定jsonから変数へ読み込み
+        # ファイル名
+        single_file_names = glob.glob(self._setting_dict["file"]["path"] + self._setting_dict["file"]["single"])
+        double_file_names = glob.glob(self._setting_dict["file"]["path"] + self._setting_dict["file"]["double"])
+        all_file_names = single_file_names + double_file_names
 
-log.info(all_file_names)
+        self.log.info(all_file_names)
 
 # 初回プロットの範囲
-plot_range_start = setting_dict["plot"]["start"]
-plot_range_end = setting_dict["plot"]["end"]
+plot_range_start = self._setting_dict["plot"]["start"]
+plot_range_end = self._setting_dict["plot"]["end"]
 
 log.debug(f"{plot_range_start}～{plot_range_end}")
 
 # ラベル
-label_dict = setting_dict["label"]
+label_dict = self._setting_dict["label"]
 
 log.debug(label_dict)
 
@@ -215,6 +223,8 @@ log.debug(df_result)
 # エクセルへの書き込み
 df_result.to_excel("result.xlsx", sheet_name="Voltage01", index=False)
 
+# ロガー登録
+log = logger.Logger("MAIN", level=DEBUG_LEVEL)
 
 def main():
     data = ExtractorData("setting.json")
