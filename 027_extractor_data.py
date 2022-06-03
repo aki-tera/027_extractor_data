@@ -26,6 +26,7 @@ while True:
 
 def separate_index(list):
     """Split a chunk of index into a list.
+
     Args:
         list (list): a chunk of index
     Return:
@@ -53,6 +54,7 @@ def separate_index(list):
 
 def plot_graph(pg_df, pg_title_text, pg_plane=True):
     """plot pandas DataFrame on the graph(s).
+
     Args:
         pg_df (pandas.DataFrame or pandas.Series): Data to be graphed.
         pg_title_text (str): title
@@ -157,9 +159,12 @@ class ExtractorData():
 
     def confirm_data(self, label_name, display_graph=True):
         """confirm data
+
         Args:
             label_name (str): the label indicating the target data.
             display_graph (bool, optional): graph display on/off. Defaults to True.
+        Returns:
+            bool: The target label exists.
         """
         # 列の名称
         try:
@@ -175,6 +180,12 @@ class ExtractorData():
             return True
 
     def cut_out_data(self, label_name, display_graph=True):
+        """cut out the data which you need.
+
+        Args:
+            label_name (str): the label indicating the target data.
+            display_graph (bool, optional): graph display on/off. Defaults to True.
+        """
         # 列の名称
         column_name = self.dict_label[label_name]
         # 閾値
@@ -201,6 +212,11 @@ class ExtractorData():
             plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
 
     def output_mediun(self, label_name):
+        """Calculate the median
+
+        Args:
+            label_name (str): the label indicating the target data.
+        """
         # 列の名称
         column_name = self.dict_label[label_name]
         # 中央値の算出
@@ -221,6 +237,12 @@ class ExtractorData():
         log.debug(self._df_result)
 
     def write_xlsx(self, label_name, write_mode="w"):
+        """write xlsx file.
+
+        Args:
+            label_name (str): the label indicating the target data.
+            write_mode (str, optional): File mode to use (write or append). Defaults to "w".
+        """
         # エクセルへの書き込み
         with pd.ExcelWriter("result.xlsx", engine="openpyxl", mode=write_mode) as writer:
             self._df_result.to_excel(writer, sheet_name=label_name, index=False)
