@@ -177,13 +177,13 @@ class ExtractorData():
         df_temp = self._df_csv[(range_low < self._df_csv[column_name]) & (self._df_csv[column_name] < range_high)]
         # indexの抽出
         pandas_list = df_temp.index
-        list_index = separate_index(list(pandas_list))
-        log.debug(list_index[0])
-        log.debug(self._df_csv.loc[list_index[0]])
+        self.list_index = separate_index(list(pandas_list))
+        log.debug(self.list_index[0])
+        log.debug(self._df_csv.loc[self.list_index[0]])
         # 確認用プロットを表示
         if display_graph:
             df_plot_temp = pd.DataFrame(index=[])
-            for i, j in enumerate(list_index):
+            for i, j in enumerate(self.list_index):
                 if -1 < i < 9:
                     temp = self._df_csv[j[0]:j[-1]][column_name]
                     temp = temp.reset_index()
@@ -192,33 +192,26 @@ class ExtractorData():
             print("おかしなグラフが無いか確認する")
             plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
 
-# 中央値の算出
-result_mediun = []
-result_endheader = []
-result_time = []
+    def output_mediun(self, label_name):
+        # 列の名称
+        column_name = self.dict_label[label_name]
+        # 中央値の算出
+        result_mediun = []
+        result_endheader = []
+        result_time = []
+        for i in self.list_index:
+            log.debug(f"list{i}->value:{i[0]}")
+            df_temp = self._df_csv.loc[i]
+            temp_result = df_temp[column_name].median()
+            temp_endheader = self._df_csv.iloc[i[0], 0]
+            temp_time = self._df_csv.iloc[i[0], 1]
+            result_mediun.append(temp_result)
+            result_endheader.append(temp_endheader)
+            result_time.append(temp_time)
+        # 結果用データフレーム作成（時間、秒、結果）
+        self._df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", "Voltage01"])
+        log.debug(df_result)
 
-
-for i in list_index:
-    log.debug(f"list{i}->value:{i[0]}")
-    df_temp = self._df_csv.loc[i]
-    temp_result = df_temp[self.dict_label["Voltage01"]].median()
-    temp_endheader = self._df_csv.iloc[i[0], 0]
-    temp_time = self._df_csv.iloc[i[0], 1]
-    result_mediun.append(temp_result)
-    result_endheader.append(temp_endheader)
-    result_time.append(temp_time)
-
-log.debug(result_mediun)
-log.debug(result_endheader)
-log.debug(result_time)
-
-# 結果用データフレーム作成（時間、秒、結果）
-df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", "Voltage01"])
-
-log.debug(df_result)
-
-# エクセルへの書き込み
-df_result.to_excel("result.xlsx", sheet_name="Voltage01", index=False)
 
 # ロガー登録
 log = logger.Logger("MAIN", level=DEBUG_LEVEL)
@@ -231,9 +224,9 @@ def main():
         data.cut_out_data(n, display_graph=True)
         data.output_mediun(n)
         if i == 0:
-            data.write_xlsx()
+            data.write_xlsx(n)
         else:
-            data.write_xlsx(write_mode="a")
+            data.write_xlsx(n, write_mode="a")
 
 
 if __name__ == "__main__":
