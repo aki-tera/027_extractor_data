@@ -123,26 +123,25 @@ class ExtractorData():
         single_file_names = glob.glob(self._setting_dict["file"]["path"] + self._setting_dict["file"]["single"])
         double_file_names = glob.glob(self._setting_dict["file"]["path"] + self._setting_dict["file"]["double"])
         all_file_names = single_file_names + double_file_names
+        # 初回プロットの範囲
+        plot_range_start = self._setting_dict["plot"]["start"]
+        plot_range_end = self._setting_dict["plot"]["end"]
+        # ラベル
+        label_index = self._setting_dict["label"]
 
         self.log.info(all_file_names)
+        log.debug(f"{plot_range_start}～{plot_range_end}")
+        log.debug(label_index)
 
-# 初回プロットの範囲
-plot_range_start = self._setting_dict["plot"]["start"]
-plot_range_end = self._setting_dict["plot"]["end"]
 
-log.debug(f"{plot_range_start}～{plot_range_end}")
 
-# ラベル
-label_dict = self._setting_dict["label"]
-
-log.debug(label_dict)
 
 # 閾値
-range_high = label_dict["Voltage01"]["high"]
-range_low = label_dict["Voltage01"]["low"]
+range_high = label_index["Voltage01"]["high"]
+range_low = label_index["Voltage01"]["low"]
 
-for i in label_dict:
-    log.debug(f'{i}:{label_dict[i]["low"]}～{label_dict[i]["high"]}')
+for i in label_index:
+    log.debug(f'{i}:{label_index[i]["low"]}～{label_index[i]["high"]}')
 
 
 
