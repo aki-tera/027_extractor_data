@@ -11,6 +11,7 @@ from matplotlib import cm
 
 # 日本語フォント設定
 from matplotlib import rc
+from sklearn.utils import column_or_1d
 jp_font = "Yu Gothic"
 rc('font', family=jp_font)
 
@@ -162,36 +163,34 @@ class ExtractorData():
         """
         if display_graph:
             # プロットする
+            print("取得したデータの確認")
             plot_graph(self._df_csv.loc[self._plot_range_start:self._plot_range_end, self.dict_label["Voltage01"]],
                        f"読み込んだデータの一部（{self._plot_range_start}～{self._plot_range_end}）を表示")
 
-
-
-
+    def cut_out_data(self, label_name, display_graph=True):
+        # 列の名称
+        column_name = self.dict_label[label_name]
         # 閾値
         range_high = self.label_index[self.dict_label[label_name]]["high"]
         range_low = self.label_index[self.dict_label[label_name]]["low"]
-
-# データ切り分け
-df_temp = self._df_csv[(range_low < self._df_csv[self.dict_label["Voltage01"]]) & (self._df_csv[self.dict_label["Voltage01"]] < range_high) ]
-log.debug(df_temp)
-
-# indexの抽出
-pandas_list = df_temp.index
-list_index = separate_index(list(pandas_list))
-log.debug(list_index[0])
-log.debug(self._df_csv.loc[list_index[0]])
-
-# 確認用プロットを表示
-df_plot_temp = pd.DataFrame(index=[])
-for i, j in enumerate(list_index):
-    if -1 < i < 9:
-        temp = self._df_csv[j[0]:j[-1]][self.dict_label["Voltage01"]]
-        temp = temp.reset_index()
-        df_plot_temp[str(i)] = temp[self.dict_label["Voltage01"]]
-# 一部の切り出した波形を表示
-print("おかしなグラフが無いか確認する")
-plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
+        # データ切り分け
+        df_temp = self._df_csv[(range_low < self._df_csv[column_name]) & (self._df_csv[column_name] < range_high)]
+        # indexの抽出
+        pandas_list = df_temp.index
+        list_index = separate_index(list(pandas_list))
+        log.debug(list_index[0])
+        log.debug(self._df_csv.loc[list_index[0]])
+        # 確認用プロットを表示
+        if display_graph:
+            df_plot_temp = pd.DataFrame(index=[])
+            for i, j in enumerate(list_index):
+                if -1 < i < 9:
+                    temp = self._df_csv[j[0]:j[-1]][column_name]
+                    temp = temp.reset_index()
+                    df_plot_temp[str(i)] = temp[column_name]
+            # 一部の切り出した波形を表示
+            print("おかしなグラフが無いか確認する")
+            plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
 
 # 中央値の算出
 result_mediun = []
@@ -229,9 +228,8 @@ def main():
     for i, n in enumerate(data.label_index):
         log.debug(n)
         data.confirm_data(n, display_graph=True)
-        data.cut_out_data(display_graph=True)
-        data.confirm_graphs(display_graph=True)
-        data.output_mediun(n, display_graph=True)
+        data.cut_out_data(n, display_graph=True)
+        data.output_mediun(n)
         if i == 0:
             data.write_xlsx()
         else:
