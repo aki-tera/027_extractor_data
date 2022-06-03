@@ -161,18 +161,25 @@ class ExtractorData():
             label_name (str): the label indicating the target data.
             display_graph (bool, optional): graph display on/off. Defaults to True.
         """
-        if display_graph:
-            # プロットする
-            print("取得したデータの確認")
-            plot_graph(self._df_csv.loc[self._plot_range_start:self._plot_range_end, self.dict_label["Voltage01"]],
-                       f"読み込んだデータの一部（{self._plot_range_start}～{self._plot_range_end}）を表示")
+        # 列の名称
+        try:
+            column_name = self.dict_label[label_name]
+        except KeyError:
+            return False
+        else:
+            if display_graph:
+                # プロットする
+                print("取得したデータの確認")
+                plot_graph(self._df_csv.loc[self._plot_range_start:self._plot_range_end, column_name],
+                           f"読み込んだデータの一部（{self._plot_range_start}～{self._plot_range_end}）を表示")
+            return True
 
     def cut_out_data(self, label_name, display_graph=True):
         # 列の名称
         column_name = self.dict_label[label_name]
         # 閾値
-        range_high = self.label_index[self.dict_label[label_name]]["high"]
-        range_low = self.label_index[self.dict_label[label_name]]["low"]
+        range_high = self.label_index[label_name]["high"]
+        range_low = self.label_index[label_name]["low"]
         # データ切り分け
         df_temp = self._df_csv[(range_low < self._df_csv[column_name]) & (self._df_csv[column_name] < range_high)]
         # indexの抽出
@@ -185,6 +192,7 @@ class ExtractorData():
             df_plot_temp = pd.DataFrame(index=[])
             for i, j in enumerate(self.list_index):
                 if -1 < i < 9:
+                    log.debug(j)
                     temp = self._df_csv[j[0]:j[-1]][column_name]
                     temp = temp.reset_index()
                     df_plot_temp[str(i)] = temp[column_name]
@@ -209,29 +217,30 @@ class ExtractorData():
             result_endheader.append(temp_endheader)
             result_time.append(temp_time)
         # 結果用データフレーム作成（時間、秒、結果）
-        self._df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", "Voltage01"])
-        log.debug(df_result)
+        self._df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", column_name])
+        log.debug(self._df_result)
 
-    def write_xlsx(self, write_mode="m"):
-        # 列の名称
-        column_name = self.dict_label[label_name]
+    def write_xlsx(self, label_name, write_mode="w"):
         # エクセルへの書き込み
-        self,df_result.to_excel("result.xlsx", sheet_name=column_name, index=False, mode=write_mode)
+        with pd.ExcelWriter("result.xlsx", engine="openpyxl", mode=write_mode) as writer:
+            self._df_result.to_excel(writer, sheet_name=label_name, index=False)
+
 
 # ロガー登録
 log = logger.Logger("MAIN", level=DEBUG_LEVEL)
+
 
 def main():
     data = ExtractorData("setting.json")
     for i, n in enumerate(data.label_index):
         log.debug(n)
-        data.confirm_data(n, display_graph=True)
-        data.cut_out_data(n, display_graph=True)
-        data.output_mediun(n)
-        if i == 0:
-            data.write_xlsx(n)
-        else:
-            data.write_xlsx(n, write_mode="a")
+        if data.confirm_data(n, display_graph=True):
+            data.cut_out_data(n, display_graph=True)
+            data.output_mediun(n)
+            if i == 0:
+                data.write_xlsx(n)
+            else:
+                data.write_xlsx(n, write_mode="a")
 
 
 if __name__ == "__main__":
