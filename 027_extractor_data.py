@@ -1,8 +1,6 @@
 import json
-import csv
 
 import glob
-from cv2 import DISOPTICAL_FLOW_PRESET_ULTRAFAST
 import pandas as pd
 from pandas.core.series import Series
 from pandas.core.frame import DataFrame
@@ -11,18 +9,9 @@ from matplotlib import cm
 
 # 日本語フォント設定
 from matplotlib import rc
-from sklearn.utils import column_or_1d
 jp_font = "Yu Gothic"
 rc('font', family=jp_font)
 
-# PEP8に準拠するとimportが先頭に行くので苦肉の策
-while True:
-    import sys
-    sys.path.append("../000_mymodule/")
-    import logger
-    from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
-    DEBUG_LEVEL = INFO
-    break
 
 def separate_index(list):
     """Split a chunk of index into a list.
@@ -51,6 +40,7 @@ def separate_index(list):
     result.append(temp)
 
     return(result)
+
 
 def plot_graph(pg_df, pg_title_text, pg_plane=True):
     """plot pandas DataFrame on the graph(s).
@@ -104,11 +94,10 @@ def plot_graph(pg_df, pg_title_text, pg_plane=True):
     plt.show()
 
 
-
 class ExtractorData():
     """concatenate csv files, extract specific data and save the results to excel.
     """
-    log = logger.Logger("ExtractorData", level=DEBUG_LEVEL)
+    
     def __init__(self, json_file_path):
         """read json, set the variables, concatenate csv files and make dataframe.
 
@@ -118,9 +107,6 @@ class ExtractorData():
         # パラメータの取り出し
         with open(json_file_path, "r", encoding="utf-8") as setting:
             self._setting_dict = json.load(setting)
-        
-        self.log.info("json")
-
         # 設定jsonから変数へ読み込み
         # ファイル名
         single_file_names = glob.glob(self._setting_dict["file"]["path"] + self._setting_dict["file"]["single"])
@@ -131,31 +117,23 @@ class ExtractorData():
         self._plot_range_end = self._setting_dict["plot"]["end"]
         # ラベル
         self.label_index = self._setting_dict["label"]
-
-        self.log.info(all_file_names)
-        log.debug(f"{self._plot_range_start}～{self._plot_range_end}")
-        log.debug(self.label_index)
-
         # 結果データの読み込み
         temp_df_list = []
         for i, j in enumerate(all_file_names):
             # 結果列の名前を判別するための辞書作成
             if i == 0:
-                self.dict_label = {"key":"value"}
+                self.dict_label = {"key": "value"}
                 with open(j, encoding="cp932")as f:
                     temp_label = f.readlines()[39:41]
                 for ii, (m, n) in enumerate(zip(temp_label[0].split(","), temp_label[1].split(","))):
-                    log.debug(f"{ii}:{m.strip()}->{n.strip()}")
+                    
                     if ii > 1:
                         self.dict_label[n.strip().strip('"')] = m.strip()
-                log.debug(self.dict_label)
             temp_df = pd.read_csv(j, skiprows=70, encoding="cp932")
             temp_df_list.append(temp_df)
-
         # データフレームの結合
         self._df_csv = pd.concat(temp_df_list, ignore_index=False)
         self._df_csv.reset_index(drop=True, inplace=True)
-        log.debug(self._df_csv.head(5))
 
     def confirm_data(self, label_name, display_graph=True):
         """confirm data
@@ -196,14 +174,11 @@ class ExtractorData():
         # indexの抽出
         pandas_list = df_temp.index
         self.list_index = separate_index(list(pandas_list))
-        log.debug(self.list_index[0])
-        log.debug(self._df_csv.loc[self.list_index[0]])
         # 確認用プロットを表示
         if display_graph:
             df_plot_temp = pd.DataFrame(index=[])
             for i, j in enumerate(self.list_index):
                 if -1 < i < 9:
-                    log.debug(j)
                     temp = self._df_csv[j[0]:j[-1]][column_name]
                     temp = temp.reset_index()
                     df_plot_temp[str(i)] = temp[column_name]
@@ -224,7 +199,6 @@ class ExtractorData():
         result_endheader = []
         result_time = []
         for i in self.list_index:
-            log.debug(f"list{i}->value:{i[0]}")
             df_temp = self._df_csv.loc[i]
             temp_result = df_temp[column_name].median()
             temp_endheader = self._df_csv.iloc[i[0], 0]
@@ -234,7 +208,6 @@ class ExtractorData():
             result_time.append(temp_time)
         # 結果用データフレーム作成（時間、秒、結果）
         self._df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", column_name])
-        log.debug(self._df_result)
 
     def write_xlsx(self, label_name, write_mode="w"):
         """write xlsx file.
@@ -248,14 +221,10 @@ class ExtractorData():
             self._df_result.to_excel(writer, sheet_name=label_name, index=False)
 
 
-# ロガー登録
-log = logger.Logger("MAIN", level=DEBUG_LEVEL)
-
-
 def main():
     data = ExtractorData("setting.json")
     for i, n in enumerate(data.label_index):
-        log.debug(n)
+        
         if data.confirm_data(n, display_graph=True):
             data.cut_out_data(n, display_graph=True)
             data.output_mediun(n)
