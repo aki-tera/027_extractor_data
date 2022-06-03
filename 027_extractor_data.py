@@ -214,3 +214,21 @@ log.debug(df_result)
 
 # エクセルへの書き込み
 df_result.to_excel("result.xlsx", sheet_name="Voltage01", index=False)
+
+
+def main():
+    data = ExtractorData("setting.json")
+    for i, n in enumerate(data.label_index):
+        data.confirm_data(n, display_graph=True)
+        data.generate_differences(display_graph=True)
+        data.cut_out_data(display_graph=True)
+        data.confirm_graphs(display_graph=True)
+        data.output_results(n, display_graph=True)
+        if i == 0:
+            data.write_xlsx()
+        else:
+            data.write_xlsx(write_mode="a")
+
+
+if __name__ == "__main__":
+    main()
