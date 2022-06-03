@@ -212,6 +212,11 @@ class ExtractorData():
         self._df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", "Voltage01"])
         log.debug(df_result)
 
+    def write_xlsx(self, write_mode="m"):
+        # 列の名称
+        column_name = self.dict_label[label_name]
+        # エクセルへの書き込み
+        self,df_result.to_excel("result.xlsx", sheet_name=column_name, index=False, mode=write_mode)
 
 # ロガー登録
 log = logger.Logger("MAIN", level=DEBUG_LEVEL)
