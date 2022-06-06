@@ -120,6 +120,7 @@ class ExtractorData():
         # 結果データの読み込み
         temp_df_list = []
         for i, j in enumerate(all_file_names):
+            print(f"ファイル連結中：{j}")
             # 結果列の名前を判別するための辞書作成
             if i == 0:
                 self.dict_label = {"key": "value"}
@@ -152,7 +153,7 @@ class ExtractorData():
         else:
             if display_graph:
                 # プロットする
-                print("取得したデータの確認")
+                print("取得したデータの確認（xで次のステップ）")
                 plot_graph(self._df_csv.loc[self._plot_range_start:self._plot_range_end, column_name],
                            f"読み込んだデータの一部（{self._plot_range_start}～{self._plot_range_end}）を表示")
             return True
@@ -183,7 +184,7 @@ class ExtractorData():
                     temp = temp.reset_index()
                     df_plot_temp[str(i)] = temp[column_name]
             # 一部の切り出した波形を表示
-            print("おかしなグラフが無いか確認する")
+            print("おかしなグラフが無いか確認する（xで次のステップ）")
             plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
 
     def output_mediun(self, label_name):
@@ -192,6 +193,7 @@ class ExtractorData():
         Args:
             label_name (str): the label indicating the target data.
         """
+        print("中央値を取得中")
         # 列の名称
         column_name = self.dict_label[label_name]
         # 中央値の算出
@@ -216,6 +218,7 @@ class ExtractorData():
             label_name (str): the label indicating the target data.
             write_mode (str, optional): File mode to use (write or append). Defaults to "w".
         """
+        print(f"結果をresult.xlsxのシート『{label_name}』に書き込み中")
         # エクセルへの書き込み
         with pd.ExcelWriter("result.xlsx", engine="openpyxl", mode=write_mode) as writer:
             self._df_result.to_excel(writer, sheet_name=label_name, index=False)
