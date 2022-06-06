@@ -50,3 +50,10 @@ Python Library
 - glob
 - json
 
+## Usage
+
+1. You place the csv files in the same folder as this program.
+1. Run this program.
+1. A few graphs is displayed for confirmation.
+1. And then generate result's excell files.
+
