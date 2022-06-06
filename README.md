@@ -57,3 +57,12 @@ Python Library
 1. A few graphs is displayed for confirmation.
 1. And then generate result's excell files.
 
+## Note
+
+Nothing in particular
+
+## License
+
+This program is under MIT license.
+
+
