@@ -18,3 +18,6 @@
 - However, only the first 9 items.  
 <img src="https://user-images.githubusercontent.com/44888139/172106153-71021afb-9e28-4ab0-be67-23e05965e5e4.png" width="300px"> 
 
+## Features
+
+You can get an excel file that records the median value.
