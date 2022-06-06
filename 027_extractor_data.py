@@ -123,13 +123,13 @@ class ExtractorData():
             print(f"ファイル連結中：{j}")
             # 結果列の名前を判別するための辞書作成
             if i == 0:
-                self.dict_label = {"key": "value"}
+                self._dict_label = {"key": "value"}
                 with open(j, encoding="cp932")as f:
                     temp_label = f.readlines()[39:41]
                 for ii, (m, n) in enumerate(zip(temp_label[0].split(","), temp_label[1].split(","))):
                     
                     if ii > 1:
-                        self.dict_label[n.strip().strip('"')] = m.strip()
+                        self._dict_label[n.strip().strip('"')] = m.strip()
             temp_df = pd.read_csv(j, skiprows=70, encoding="cp932")
             temp_df_list.append(temp_df)
         # データフレームの結合
@@ -147,7 +147,7 @@ class ExtractorData():
         """
         # 列の名称
         try:
-            column_name = self.dict_label[label_name]
+            column_name = self._dict_label[label_name]
         except KeyError:
             return False
         else:
@@ -166,7 +166,7 @@ class ExtractorData():
             display_graph (bool, optional): graph display on/off. Defaults to True.
         """
         # 列の名称
-        column_name = self.dict_label[label_name]
+        column_name = self._dict_label[label_name]
         # 閾値
         range_high = self.label_index[label_name]["high"]
         range_low = self.label_index[label_name]["low"]
@@ -201,7 +201,7 @@ class ExtractorData():
         """
         print("中央値を取得中")
         # 列の名称
-        column_name = self.dict_label[label_name]
+        column_name = self._dict_label[label_name]
         # 中央値の算出
         result_mediun = []
         result_endheader = []
