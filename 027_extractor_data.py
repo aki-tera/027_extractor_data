@@ -224,7 +224,7 @@ class ExtractorData():
             label_name (str): the label indicating the target data.
             write_mode (str, optional): File mode to use (write or append). Defaults to "w".
         """
-        print(f"結果をresult.xlsxのシート『{label_name}』に書き込み中")
+        print(f"結果をresult.xlsxのシート『{label_name}』に書き込み中\n")
         # エクセルへの書き込み
         with pd.ExcelWriter("result.xlsx", engine="openpyxl", mode=write_mode) as writer:
             self._df_result.to_excel(writer, sheet_name=label_name, index=False)
@@ -233,14 +233,20 @@ class ExtractorData():
 def main():
     data = ExtractorData("setting.json")
     for i, n in enumerate(data.label_index):
-        
+        print(f"{n}を抽出開始")
         if data.confirm_data(n, display_graph=True):
-            data.cut_out_data(n, display_graph=True)
-            data.output_mediun(n)
-            if i == 0:
-                data.write_xlsx(n)
+            if data.cut_out_data(n, display_graph=True):
+                # データ抽出ができる場合
+                data.output_mediun(n)
+                if i == 0:
+                    data.write_xlsx(n)
+                else:
+                    data.write_xlsx(n, write_mode="a")
             else:
-                data.write_xlsx(n, write_mode="a")
+                # データ抽出ができない場合
+                print(f"{n}はデータを抽出できません\n")
+        else:
+            print(f"{n}は抽出できません\n")
 
 
 if __name__ == "__main__":
