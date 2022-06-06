@@ -174,18 +174,24 @@ class ExtractorData():
         df_temp = self._df_csv[(range_low < self._df_csv[column_name]) & (self._df_csv[column_name] < range_high)]
         # indexの抽出
         pandas_list = df_temp.index
-        self.list_index = separate_index(list(pandas_list))
-        # 確認用プロットを表示
-        if display_graph:
-            df_plot_temp = pd.DataFrame(index=[])
-            for i, j in enumerate(self.list_index):
-                if -1 < i < 9:
-                    temp = self._df_csv[j[0]:j[-1]][column_name]
-                    temp = temp.reset_index()
-                    df_plot_temp[str(i)] = temp[column_name]
-            # 一部の切り出した波形を表示
-            print("おかしなグラフが無いか確認する（xで次のステップ）")
-            plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
+        if len(pandas_list) != 0:
+            # 切り取りデータが有る場合
+            self.list_index = separate_index(list(pandas_list))
+            # 確認用プロットを表示
+            if display_graph:
+                df_plot_temp = pd.DataFrame(index=[])
+                for i, j in enumerate(self.list_index):
+                    if -1 < i < 9:
+                        temp = self._df_csv[j[0]:j[-1]][column_name]
+                        temp = temp.reset_index()
+                        df_plot_temp[str(i)] = temp[column_name]
+                # 一部の切り出した波形を表示
+                print("おかしなグラフが無いか確認する（xで次のステップ）")
+                plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
+            return True
+        else:
+            # 切り取りデータが無い場合
+            return False
 
     def output_mediun(self, label_name):
         """Calculate the median
