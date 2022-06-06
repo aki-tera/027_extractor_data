@@ -20,4 +20,10 @@
 
 ## Features
 
-You can get an excel file that records the median value.
+You can get an excel file that records the median values.
+
+### specification
+
+- You get the median values by some columns from the ranges which you want between high and low.
+- You can change the settings by setting file.
+
