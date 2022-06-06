@@ -27,3 +27,10 @@ You can get an excel file that records the median values.
 - You get the median values by some columns from the ranges which you want between high and low.
 - You can change the settings by setting file.
 
+### original csv files
+
+- The data needs to be stable data outside the range for a certain period of time.
+
+### output data
+
+- You get an excel file with the median of the column indicated on the label.
