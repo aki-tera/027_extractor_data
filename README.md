@@ -34,3 +34,19 @@ You can get an excel file that records the median values.
 ### output data
 
 - You get an excel file with the median of the column indicated on the label.
+
+## Requirement  
+
+Python 3
+
+- I ran this program with the following execution environment.
+  - Python 3.9
+  - Windows 10
+
+Python Library
+
+- pandas
+- matplotlib
+- glob
+- json
+
