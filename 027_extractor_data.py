@@ -216,6 +216,9 @@ class ExtractorData():
             result_time.append(temp_time)
         # 結果用データフレーム作成（時間、秒、結果）
         self._df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", column_name])
+        # 中央値の結果を表示
+        print("おかしな結果で無いか確認する（xで次のステップ）")
+        plot_graph(self._df_result[column_name], f"{label_name}の中央値を表示")
 
     def write_xlsx(self, label_name, write_mode="w"):
         """write xlsx file.
