@@ -153,9 +153,9 @@ class ExtractorData():
         else:
             if display_graph:
                 # プロットする
-                print("取得したデータの確認（xで次のステップ）")
+                print(f"{label_name}より取得したデータの確認（xで次のステップ）")
                 plot_graph(self._df_csv.loc[self._plot_range_start:self._plot_range_end, column_name],
-                           f"読み込んだデータの一部（{self._plot_range_start}～{self._plot_range_end}）を表示")
+                           f"{label_name}から読み込んだデータの一部（{self._plot_range_start}～{self._plot_range_end}）を表示")
             return True
 
     def cut_out_data(self, label_name, display_graph=True):
@@ -186,8 +186,8 @@ class ExtractorData():
                         temp = temp.reset_index()
                         df_plot_temp[str(i)] = temp[column_name]
                 # 一部の切り出した波形を表示
-                print("おかしなグラフが無いか確認する（xで次のステップ）")
-                plot_graph(df_plot_temp, "おかしなグラフが無いか確認する", pg_plane=False)
+                print(f"{label_name}でおかしなグラフが無いか確認する（xで次のステップ）")
+                plot_graph(df_plot_temp, f"{label_name}でおかしなグラフが無いか確認する", pg_plane=False)
             return True
         else:
             # 切り取りデータが無い場合
@@ -216,6 +216,9 @@ class ExtractorData():
             result_time.append(temp_time)
         # 結果用データフレーム作成（時間、秒、結果）
         self._df_result = pd.DataFrame(list(zip(result_endheader, result_time, result_mediun)), columns=["#EndHeader", "日時(μs)", column_name])
+        # 中央値の結果を表示
+        print("おかしな結果で無いか確認する（xで次のステップ）")
+        plot_graph(self._df_result[column_name], f"{label_name}の中央値を表示")
 
     def write_xlsx(self, label_name, write_mode="w"):
         """write xlsx file.
