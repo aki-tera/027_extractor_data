@@ -13,7 +13,7 @@ jp_font = "Yu Gothic"
 rc('font', family=jp_font)
 
 
-def separate_index(list):
+def separate_index(list, number=5):
     """Split a chunk of index into a list.
 
     Args:
