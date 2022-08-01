@@ -174,13 +174,15 @@ class ExtractorData():
         # 閾値
         range_high = self.label_index[label_name]["high"]
         range_low = self.label_index[label_name]["low"]
+        # indexの塊の最小値
+        unneeded_number = self.label_index[label_name]["unneeded"]
         # データ切り分け
         df_temp = self._df_csv[(range_low < self._df_csv[column_name]) & (self._df_csv[column_name] < range_high)]
         # indexの抽出
         pandas_list = df_temp.index
         if len(pandas_list) != 0:
             # 切り取りデータが有る場合
-            self.list_index = separate_index(list(pandas_list))
+            self.list_index = separate_index(list(pandas_list), unneeded_number)
             # 確認用プロットを表示
             if display_graph:
                 df_plot_temp = pd.DataFrame(index=[])
