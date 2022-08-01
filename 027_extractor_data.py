@@ -13,7 +13,7 @@ jp_font = "Yu Gothic"
 rc('font', family=jp_font)
 
 
-def separate_index(list):
+def separate_index(list, number=0):
     """Split a chunk of index into a list.
 
     Args:
@@ -32,12 +32,16 @@ def separate_index(list):
             temp.append(val)
         else:
             # 値が連続していない場合、結果を取り出す
-            result.append(temp)
+            # その際、最小のindex数が指定されている場合はその数以下は不要とする
+            if len(temp) > number:
+                result.append(temp)
             temp = [val]
         # 前の値として保存する
         val_pre = val
     # 最後のみ残りの部分を保存する
-    result.append(temp)
+    # その際、最小のindex数が指定されている場合はその数以下は不要とする
+    if len(temp) > number:
+        result.append(temp)
 
     return(result)
 
@@ -170,13 +174,15 @@ class ExtractorData():
         # 閾値
         range_high = self.label_index[label_name]["high"]
         range_low = self.label_index[label_name]["low"]
+        # indexの塊の最小値
+        unneeded_number = self.label_index[label_name]["unneeded"]
         # データ切り分け
         df_temp = self._df_csv[(range_low < self._df_csv[column_name]) & (self._df_csv[column_name] < range_high)]
         # indexの抽出
         pandas_list = df_temp.index
         if len(pandas_list) != 0:
             # 切り取りデータが有る場合
-            self.list_index = separate_index(list(pandas_list))
+            self.list_index = separate_index(list(pandas_list), unneeded_number)
             # 確認用プロットを表示
             if display_graph:
                 df_plot_temp = pd.DataFrame(index=[])
