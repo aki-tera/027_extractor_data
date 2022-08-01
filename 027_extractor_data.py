@@ -13,7 +13,7 @@ jp_font = "Yu Gothic"
 rc('font', family=jp_font)
 
 
-def separate_index(list, number=5):
+def separate_index(list, number=0):
     """Split a chunk of index into a list.
 
     Args:
@@ -32,12 +32,16 @@ def separate_index(list, number=5):
             temp.append(val)
         else:
             # 値が連続していない場合、結果を取り出す
-            result.append(temp)
+            # その際、最小のindex数が指定されている場合はその数以下は不要とする
+            if len(temp) > number:
+                result.append(temp)
             temp = [val]
         # 前の値として保存する
         val_pre = val
     # 最後のみ残りの部分を保存する
-    result.append(temp)
+    # その際、最小のindex数が指定されている場合はその数以下は不要とする
+    if len(temp) > number:
+        result.append(temp)
 
     return(result)
 
