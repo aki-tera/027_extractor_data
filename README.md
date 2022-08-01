@@ -8,7 +8,7 @@
 <img src="https://user-images.githubusercontent.com/44888139/172100508-a9327c7c-4f92-4c51-bb7f-9780c049f6b9.png" width="500px">
 
 **INPUT Data and Setting  ->**  
-<img src="https://user-images.githubusercontent.com/44888139/172106787-ce672d0f-887b-40db-b875-8de2133c856c.png" width="500px"> 
+<img src="https://user-images.githubusercontent.com/44888139/182105493-adaf5984-e297-4d95-a112-917758739690.png" width="500px"> 
 
 **Progress can be checked with graphs**
 
